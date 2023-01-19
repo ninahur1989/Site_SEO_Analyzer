@@ -75,6 +75,12 @@
                 {
                     if (node["loc"] != null)
                     {
+                        if(node["loc"].InnerText.StartsWith("/"))
+                        {
+                            yield return Startup.BaseUrl + node["loc"].InnerText;
+                            continue;
+                        }
+
                         yield return node["loc"].InnerText;
                     }
                 }
