@@ -2,10 +2,11 @@
 {
     using HtmlAgilityPack;
     using Site_Mapper.Services.Interfaces;
+    using Site_Mapper.Services.Logger;
     using System.Net;
     using System.Xml;
 
-    internal class UrlServise : IUrlServise
+    internal class UrlService : IUrlService
     {
         public IEnumerable<string> GetUrls(string url)
         {
@@ -14,7 +15,7 @@
 
             if (url.StartsWith("/"))
             {
-                url = Startup.BaseUrl + url;
+                url = Startup._baseUrl + url;
             }
 
             try
@@ -24,6 +25,7 @@
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                LogsFolder.Logs.Add(ex.Message);
                 yield break;
             }
 
@@ -35,7 +37,7 @@
                 {
                     var gotUrl = link.GetAttributeValue("href", "");
 
-                    if (gotUrl.StartsWith(Startup.BaseUrl))
+                    if (gotUrl.StartsWith(Startup._baseUrl))
                     {
                         yield return gotUrl;
                         continue;
@@ -43,7 +45,7 @@
 
                     if (gotUrl.StartsWith("/"))
                     {
-                        yield return Startup.BaseUrl + gotUrl;
+                        yield return Startup._baseUrl + gotUrl;
                     }
                 }
             }
@@ -58,11 +60,12 @@
 
             try
             {
-                sitemapString = wc.DownloadString(Startup.BaseUrl + "/sitemap.xml");
+                sitemapString = wc.DownloadString(Startup._baseUrl + "/sitemap.xml");
                 urldoc.LoadXml(sitemapString);
             }
             catch (Exception ex)
             {
+                LogsFolder.Logs.Add(ex.Message);
                 Console.WriteLine(ex.Message);
                 yield break;
             }
@@ -70,18 +73,28 @@
             if (urldoc != null)
             {
                 XmlNodeList xmlSitemapList = urldoc.GetElementsByTagName("url");
-
-                foreach (XmlNode node in xmlSitemapList)
+                if (xmlSitemapList.Count <= 0)
                 {
-                    if (node["loc"] != null)
+                    xmlSitemapList = urldoc.GetElementsByTagName("loc");
+                    foreach (XmlNode node in xmlSitemapList)
                     {
-                        if(node["loc"].InnerText.StartsWith("/"))
+                        yield return node.InnerText;
+                    }
+                }
+                else
+                {
+                    foreach (XmlNode node in xmlSitemapList)
+                    {
+                        if (node["loc"] != null)
                         {
-                            yield return Startup.BaseUrl + node["loc"].InnerText;
-                            continue;
-                        }
+                            if (node["loc"].InnerText.StartsWith("/"))
+                            {
+                                yield return Startup._baseUrl + node["loc"].InnerText;
+                                continue;
+                            }
 
-                        yield return node["loc"].InnerText;
+                            yield return node["loc"].InnerText;
+                        }
                     }
                 }
             }

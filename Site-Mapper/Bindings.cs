@@ -8,8 +8,9 @@
     {
         public override void Load()
         {
-            Bind<IUrlServise>().To<UrlServise>();
+            Bind<IUrlService>().To<UrlService>();
             Bind<IWatchService>().To<WatchService>();
+            Bind<IFileService>().To<FileService>();
         }
     }
 }

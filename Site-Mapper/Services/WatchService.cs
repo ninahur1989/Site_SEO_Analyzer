@@ -1,6 +1,7 @@
 ﻿namespace Site_Mapper.Services
 {
     using Site_Mapper.Services.Interfaces;
+    using Site_Mapper.Services.Logger;
 
     internal class WatchService : IWatchService
     {
@@ -31,6 +32,7 @@
                 }
                 catch (Exception ex)
                 {
+                    LogsFolder.Logs.Add(ex.Message);
                     linkTimes.Add(link, -1);
                     continue;
                 }

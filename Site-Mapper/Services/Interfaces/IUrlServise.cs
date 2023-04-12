@@ -1,6 +1,6 @@
 ﻿namespace Site_Mapper.Services.Interfaces
 {
-    internal interface IUrlServise
+    internal interface IUrlService
     {
         public IEnumerable<string> GetUrls(string url);
 
